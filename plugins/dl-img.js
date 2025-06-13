@@ -2,51 +2,49 @@ const { cmd } = require("../command");
 const axios = require("axios");
 
 cmd({
-    pattern: "img",
-    alias: ["image", "googleimage", "searchimg"],
-    react: "🦋",
-    desc: "Search and download Google images",
+    pattern: "صور",
+    alias: ["ص", "img", "searchimg"],
+    react: "🖼️",
+    desc: "دور على صور من الإنترنت 😍",
     category: "fun",
-    use: ".img <keywords>",
+    use: ".صور <كلمة البحث>",
     filename: __filename
 }, async (conn, mek, m, { reply, args, from }) => {
     try {
         const query = args.join(" ");
-        if (!query) {
-            return reply("🖼️ Please provide a search query\nExample: .img cute cats");
+        if (!query) return reply("✋🏼 اكتبلي اللي عاوز تدور عليه يا نجم\nمثال: .صور قطط كيوت 😻");
+
+        await reply(`🔍 بدورلك على صور لـ "${query}" ... استنى ثواني`);
+
+        const url = `https://duckduckgo.com/?q=${encodeURIComponent(query)}&iax=images&ia=images`;
+
+        const tokenRes = await axios.get(url);
+        const tokenMatch = tokenRes.data.match(/vqd='([^']+)'/);
+
+        if (!tokenMatch) return reply("⚠️ معرفتش أجبلك الصور، جرّب كلمة تانية.");
+
+        const vqd = tokenMatch[1];
+        const imgApi = `https://duckduckgo.com/i.js?l=us-en&o=json&q=${encodeURIComponent(query)}&vqd=${vqd}`;
+
+        const imgRes = await axios.get(imgApi, {
+            headers: { "Referer": "https://duckduckgo.com/" }
+        });
+
+        const images = imgRes.data.results.slice(0, 5);
+
+        if (!images.length) return reply("🙁 ملقتش صور.. جرب كلمة تانية.");
+
+        for (const img of images) {
+            await conn.sendMessage(from, {
+                image: { url: img.image },
+                caption: `🔎 نتيجة للبحث: *${query}*\n> *✪『𝙇𝙐𝘾𝙄𝙁𝙀𝙍』✪*`
+            }, { quoted: mek });
+
+            await new Promise(res => setTimeout(res, 1000));
         }
 
-        await reply(`🔍 Searching images for "${query}"...`);
-
-        const url = `https://apis.davidcyriltech.my.id/googleimage?query=${encodeURIComponent(query)}`;
-        const response = await axios.get(url);
-
-        // Validate response
-        if (!response.data?.success || !response.data.results?.length) {
-            return reply("❌ No images found. Try different keywords");
-        }
-
-        const results = response.data.results;
-        // Get 5 random images
-        const selectedImages = results
-            .sort(() => 0.5 - Math.random())
-            .slice(0, 5);
-
-        for (const imageUrl of selectedImages) {
-            await conn.sendMessage(
-                from,
-                { 
-                    image: { url: imageUrl },
-                    caption: `📷 Result for: ${query}\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ɢᴏᴛᴀʀ ᴛᴇᴄʜ*`
-                },
-                { quoted: mek }
-            );
-            // Add delay between sends to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-
-    } catch (error) {
-        console.error('Image Search Error:', error);
-        reply(`❌ Error: ${error.message || "Failed to fetch images"}`);
+    } catch (err) {
+        console.error("DuckDuckGo Error:", err.message);
+        reply("💥 حصلت مشكلة وأنا بجيب الصور. جرب تاني بعد شوية.");
     }
 });
