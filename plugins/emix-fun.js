@@ -4,36 +4,37 @@ const { getBuffer } = require("../lib/functions");
 const { Sticker, StickerTypes } = require("wa-sticker-formatter");
 
 cmd({
-    pattern: "emix",
-    desc: "Combine two emojis into a sticker.",
+    pattern: "مزج-ايموجي", // ← تعريب اسم الأمر
+    alias: ["دمج"],
+    desc: "دمج اتنين إيموجي في استيكر واحد 🔥",
     category: "fun",
     react: "😃",
-    use: ".emix 😂,🙂",
+    use: ".مزج_ايموجي 😂,🙂",
     filename: __filename,
 }, async (conn, mek, m, { args, q, reply }) => {
     try {
         if (!q.includes(",")) {
-            return reply("❌ *Usage:* .emix 😂,🙂\n_Send two emojis separated by a comma._");
+            return reply("❗ *الاستخدام الصحيح:*\n.مزج_ايموجي 😂,🙂\n_ابعتلي اتنين إيموجي بينهم فصلة يا معلم_");
         }
 
         let [emoji1, emoji2] = q.split(",").map(e => e.trim());
 
         if (!emoji1 || !emoji2) {
-            return reply("❌ Please provide two emojis separated by a comma.");
+            return reply("⚠️ لازم تبعت اتنين إيموجي وبينهم فصلة.");
         }
 
         let imageUrl = await fetchEmix(emoji1, emoji2);
 
         if (!imageUrl) {
-            return reply("❌ Could not generate emoji mix. Try different emojis.");
+            return reply("💥 معرفتش أدمجهم.. جرب رموز تانية.");
         }
 
         let buffer = await getBuffer(imageUrl);
         let sticker = new Sticker(buffer, {
-            pack: "Emoji Mix",
-            author: "𝐌𝐄𝐆𝐀𝐋𝐎𝐃𝐎𝐍-𝐌𝐃",
+            pack: "مزج الإيموجي",
+            author: "عمك لوسيفر 💀🔥",
             type: StickerTypes.FULL,
-            categories: ["🤩", "🎉"],
+            categories: ["🔥", "😂", "😍"],
             quality: 75,
             background: "transparent",
         });
@@ -42,8 +43,7 @@ cmd({
         await conn.sendMessage(mek.chat, { sticker: stickerBuffer }, { quoted: mek });
 
     } catch (e) {
-        console.error("Error in .emix command:", e.message);
-        reply(`❌ Could not generate emoji mix: ${e.message}`);
+        console.error("حصلت مشكلة في أمر مزج الإيموجي:", e.message);
+        reply(`❌ حصلت مشكلة أثناء الدمج: ${e.message}`);
     }
 });
-          

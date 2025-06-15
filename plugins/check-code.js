@@ -11,27 +11,28 @@ function getFlagEmoji(countryCode) {
 }
 
 cmd({
-  pattern: "check",
-  desc: "Check country from calling code",
-  category: "utility",
+  pattern: "كود",
+  desc: "يجيبلك الدول اللي بتستخدم كود الاتصال",
+  category: "معلومات",
   filename: __filename
 }, async (conn, mek, m, { args, reply }) => {
   try {
     let code = args[0];
-    if (!code) return reply("*Please provide a country code. Example: `.check 509`*");
+    if (!code) return reply("✋🏻 اكتبلي كود دولة يا برنس، زي كده:\nكود 966");
 
     code = code.replace(/\D/g, '');
 
     const { data } = await axios.get(`https://restcountries.com/v2/callingcode/${code}`);
     
-    if (!data || data.status === 404) {
-      return reply(`❌ No country found for the code +${code}.`);
+    if (!data || data.status === 404 || data.length === 0) {
+      return reply(`❌ مفيش ولا دولة بتستخدم الكود دا +${code} 😒`);
     }
 
-    const countryList = data.map(c => `${getFlagEmoji(c.alpha2Code)} ${c.name}`).join("\n");
-    reply(`📮 *Country Code*: +${code}\n🌍 *Countries*:\n${countryList}`);
+    const countryList = data.map(c => `🌍 ${getFlagEmoji(c.alpha2Code)} *${c.name}*`).join("\n");
+    reply(`📞 *الكود*: +${code}\n\n🔎 *الدول اللي بتستخدمه:*\n${countryList}`);
+    
   } catch (e) {
     console.error("❌ API error:", e.message);
-    reply(`❌ Error: ${e.message}`);
+    reply(`⚠️ حصلت مشكله: ${e.message}`);
   }
 });

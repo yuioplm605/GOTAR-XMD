@@ -1,27 +1,25 @@
-const config = require('../config')
-const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
+const config = require('../config');
+const { cmd } = require('../command');
 
 cmd({
-    pattern: "updategdesc",
-    alias: ["upgdesc", "gdesc"],
-    react: "📜",
-    desc: "Change the group description.",
-    category: "group",
-    filename: __filename
-},           
+  pattern: "تحديث_الوصف",
+  alias: ["وصف", "غير_الوصف"],
+  react: "📜",
+  desc: "يغير وصف الجروب.",
+  category: "group",
+  filename: __filename
+},
 async (conn, mek, m, { from, isGroup, isAdmins, isBotAdmins, args, q, reply }) => {
-    try {
-        if (!isGroup) return reply("❌ This command can only be used in groups.");
-        if (!isAdmins) return reply("❌ Only group admins can use this command.");
-        if (!isBotAdmins) return reply("❌ I need to be an admin to update the group description.");
-        if (!q) return reply("❌ Please provide a new group description.");
+  try {
+    if (!isGroup) return reply("❌ الأوامر دي للجروبات بس يا عسل!");
+    if (!isAdmins) return reply("❌ انت مش أدمن يعني مش من حقك تتكلم ✋");
+    if (!isBotAdmins) return reply("❌ خليك فاكر إني لازم أكون أدمن يا اهبل!");
+    if (!q) return reply("❌ طب فين الوصف الجديد؟ اكتبه بقا يسطا");
 
-        await conn.groupUpdateDescription(from, q);
-        reply("✅ Group description has been updated.");
-    } catch (e) {
-        console.error("Error updating group description:", e);
-        reply("❌ Failed to update the group description. Please try again.");
-    }
+    await conn.groupUpdateDescription(from, q);
+    reply("✅ الوصف الجديد اتحط خلاص يا معلم ✍️");
+  } catch (e) {
+    console.error("Error updating group description:", e);
+    reply("❌ حصلت مشكلة وأنا بغير الوصف.. جرب تاني.");
+  }
 });
-

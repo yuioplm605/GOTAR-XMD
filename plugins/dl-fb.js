@@ -2,36 +2,36 @@ const axios = require("axios");
 const { cmd } = require("../command");
 
 cmd({
-  pattern: "fb",
-  alias: ["facebook", "fbdl"],
-  desc: "Download Facebook videos",
-  category: "download",
+  pattern: "تحميل-فيسبوك",
+  alias: ["fb", "فب", "فيس"],
+  desc: "📥 تحميل فيديوهات من فيسبوك",
+  category: "التنزيل",
   filename: __filename,
-  use: "<Facebook URL>",
+  use: "<رابط فيسبوك>",
 }, async (conn, m, store, { from, args, q, reply }) => {
   try {
     if (!q || !q.startsWith("http")) {
-      return reply("*`A valid Facebook URL is required`*\n\nExample: `.fb https://www.facebook.com/...`");
+      return reply("❌ لازم تبعتلي رابط فيسبوك صحيح يا نجم ✋\n\n🔗 مثال: .فيسبوك https://www.facebook.com/...");
     }
 
-    await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
+    await conn.sendMessage(from, { react: { text: '📥', key: m.key } });
 
     const apiUrl = `https://www.velyn.biz.id/api/downloader/facebookdl?url=${encodeURIComponent(q)}`;
     const res = await axios.get(apiUrl);
 
     if (!res.data || res.data.status !== true || !res.data.data || !res.data.data.url) {
-      return reply("❌ Failed to fetch the video. Please try a different link.");
+      return reply("🚫 معرفتش أجيب الفيديو يا معلم.. جرب رابط تاني.");
     }
 
     const videoUrl = res.data.data.url;
 
     await conn.sendMessage(from, {
       video: { url: videoUrl },
-      caption: "📥 *Facebook Video Downloaded Successfully*\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴅʏʙʏ ᴛᴇᴄʜ* ✅",
+      caption: "📥 *الفيديو اتحمل بنجاح من فيسبوك!*\n\n✪『𝐋𝐔𝐂𝐈𝐅𝐄𝐑』✪ ✅",
     }, { quoted: m });
 
   } catch (error) {
     console.error("Facebook download error:", error?.response?.data || error.message);
-    reply("❌ An error occurred while downloading the video. Please check the link or try again later.");
+    reply("❌ حصلت مشكلة وأنا بجيب الفيديو.. جرب تبعتلي رابط غيره أو استنى شوية.");
   }
 });

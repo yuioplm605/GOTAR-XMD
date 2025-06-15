@@ -2,47 +2,46 @@ const axios = require('axios');
 const { cmd } = require('../command');
 
 cmd({
-    pattern: "define",
-    desc: "📖 Get the definition of a word",
+    pattern: "معني",
+    desc: "📖 هات معنى كلمة إنجليزي",
     react: "🔍",
-    category: "search",
+    category: "بحث",
     filename: __filename
-},
-async (conn, mek, m, { from, q, reply }) => {
+}, async (conn, mek, m, { from, q, reply }) => {
     try {
-        if (!q) return reply("Please provide a word to define.\n\n📌 *Usage:* .define [word]");
+        if (!q) return reply("❓ *اكتب الكلمة الي عايز تعرف معناها.*\n\n📌 الاستخدام: .عرف [كلمة]");
 
-        const word = q.trim();
+        const word = q.trim().toLowerCase();
         const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+        const { data } = await axios.get(url);
 
-        const response = await axios.get(url);
-        const definitionData = response.data[0];
+        const entry = data[0];
+        const phonetics = entry.phonetics?.[0]?.text || '🔇 مش لاقي النطق';
+        const audio = entry.phonetics?.[0]?.audio;
 
-        const definition = definitionData.meanings[0].definitions[0].definition;
-        const example = definitionData.meanings[0].definitions[0].example || '❌ No example available';
-        const synonyms = definitionData.meanings[0].definitions[0].synonyms.join(', ') || '❌ No synonyms available';
-        const phonetics = definitionData.phonetics[0]?.text || '🔇 No phonetics available';
-        const audio = definitionData.phonetics[0]?.audio || null;
+        let message = `📖 *الكلمة:* ${entry.word}\n🗣️ *النطق:* _${phonetics}_\n`;
 
-        const wordInfo = `
-📖 *Word*: *${definitionData.word}*  
-🗣️ *Pronunciation*: _${phonetics}_  
-📚 *Definition*: ${definition}  
-✍️ *Example*: ${example}  
-📝 *Synonyms*: ${synonyms}  
+        entry.meanings.slice(0, 2).forEach((meaning, i) => {
+            const def = meaning.definitions[0];
+            message += `\n📚 *المعنى ${i + 1}:* ${def.definition}`;
+            if (def.example) message += `\n✍️ *مثال:* ${def.example}`;
+            if (def.synonyms && def.synonyms.length)
+                message += `\n📝 *مرادفات:* ${def.synonyms.slice(0, 5).join(", ")}`;
+            message += "\n";
+        });
 
-> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴅʏʙʏ ᴛᴇᴄʜ*`;
+        message += `\n> 🌐 *المصدر: dictionaryapi.dev*`;
 
         if (audio) {
             await conn.sendMessage(from, { audio: { url: audio }, mimetype: 'audio/mpeg' }, { quoted: mek });
         }
 
-        return reply(wordInfo);
+        return reply(message);
     } catch (e) {
-        console.error("❌ Error:", e);
+        console.error("❌ Error:", e.message);
         if (e.response && e.response.status === 404) {
-            return reply("🚫 *Word not found.* Please check the spelling and try again.");
+            return reply("🚫 *الكلمة مش موجودة في القاموس.* جرب تكتبها صح.");
         }
-        return reply("⚠️ An error occurred while fetching the definition. Please try again later.");
+        return reply("⚠️ *حصلت مشكلة أثناء جلب المعنى.* حاول تاني.");
     }
 });

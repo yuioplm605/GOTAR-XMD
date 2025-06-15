@@ -1,8 +1,8 @@
 const { cmd } = require('../command');
 
 cmd({
-    pattern: "online",
-    alias: ["whosonline", "co"],
+    pattern: "مين-متصل",
+    alias: ["شوف-كام-حد-صاحي", "co"],
     desc: "Check who's online in the group (Admins & Owner only)",
     category: "group",
     react: "🟢",
@@ -11,15 +11,15 @@ cmd({
 async (conn, mek, m, { from, quoted, isGroup, isAdmins, isCreator, fromMe, reply }) => {
     try {
         // Check if the command is used in a group
-        if (!isGroup) return reply("❌ This command can only be used in a group!");
+        if (!isGroup) return reply("في الجروبات بس يا عسل 🙄");
 
         // Check if user is either creator or admin
         if (!isCreator && !isAdmins && !fromMe) {
-            return reply("❌ Only bot owner and group admins can use this command!");
+            return reply("للادمن والمطور بس يا علق 🤫");
         }
 
         // Inform user that we're checking
-        await reply("*♻️ Scanning for online members...*");
+        await reply("*بشوف كام علق فاتح....✨*");
 
         const onlineMembers = new Set();
         const groupData = await conn.groupMetadata(from);
@@ -64,7 +64,7 @@ async (conn, mek, m, { from, quoted, isGroup, isAdmins, isCreator, fromMe, reply
                 conn.ev.off('presence.update', presenceHandler);
                 
                 if (onlineMembers.size === 0) {
-                    return reply("⚠️ Couldn't detect any online members. They might be hiding their presence.");
+                    return reply("كلو نايم او خافي اخر ظهور مفيش علق صاحي 😂.");
                 }
                 
                 const onlineArray = Array.from(onlineMembers);
@@ -72,7 +72,7 @@ async (conn, mek, m, { from, quoted, isGroup, isAdmins, isCreator, fromMe, reply
                     `✑ @${member.split('@')[0]}`
                 ).join('\n');
                 
-                const message = `*🎗️ ONLINE MEMBERS ${onlineArray.length}/${groupData.participants.length}*\n\n${onlineList}`;
+                const message = `*لاقيت عيال صاحيه اهي 😂😁 ${onlineArray.length}/${groupData.participants.length}*\n\n${onlineList}`;
                 
                 await conn.sendMessage(from, { 
                     text: message,

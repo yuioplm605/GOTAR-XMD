@@ -1,38 +1,36 @@
 const { sleep } = require('../lib/functions');
 const config = require('../config');
-const { cmd, commands } = require('../command');
-
-// DybyTech 
+const { cmd } = require('../command');
 
 cmd({
-    pattern: "leave",
-    alias: ["left", "leftgc", "leavegc"],
-    desc: "Leave the group",
-    react: "🎉",
+    pattern: "برا-الروم",
+    alias: ["برا", "سيب", "اطلع_برا"],
+    desc: "يخلي البوت يخرج من الجروب.",
+    react: "🚪",
     category: "owner",
     filename: __filename
 },
 async (conn, mek, m, {
-    from, quoted, body, isCmd, command, args, q, isGroup, senderNumber, reply
+    from, isGroup, senderNumber, reply
 }) => {
     try {
-        const botOwner = conn.user.id.split(":")[0]; 
+        const botOwner = config.OWNER_NUMBER.replace(/[^0-9]/g, "") + "@s.whatsapp.net";
         const isOwner = senderNumber === botOwner;
 
         if (!isGroup) {
-            return reply("This command can only be used in groups.");
+            return reply("❌ الأمر ده شغال في الجروبات بس يا معلم.");
         }
 
         if (!isOwner) {
-            return reply("Only the bot owner can use this command.");
+            return reply("❌ مش هسمع كلامك.. ده أمر للمطور بس يا نجم 🤫");
         }
 
-        reply("Leaving group...");
-        await sleep(1500);
+        reply("🚪 ماشي يا كبير، أنا خارج اهو من الجروب 😂");
+        await sleep(1000);
         await conn.groupLeave(from);
-        reply("Goodbye! 👋");
+
     } catch (e) {
         console.error(e);
-        reply(`❌ Error: ${e}`);
+        reply(`❌ حصلت مشكلة: ${e.message}`);
     }
 });

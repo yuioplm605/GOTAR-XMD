@@ -1,56 +1,59 @@
 const config = require('../config')
 const { cmd, commands } = require('../command')
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson} = require('../lib/functions')
+const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson } = require('../lib/functions')
 
 cmd({
-    pattern: "tagall",
-    react: "🔊",
-    alias: ["gc_tagall"],
-    desc: "To Tag all Members",
+    pattern: "منشن",
+    react: "📢",
+    alias: ["يجودعان", "يرنجاله"],
+    desc: "منشن لكل أعضاء الجروب بصيغة شيك وفخامه",
     category: "group",
-    use: '.tagall [message]',
+    use: '.منشن [رسالة]',
     filename: __filename
 },
 async (conn, mek, m, { from, participants, reply, isGroup, senderNumber, groupAdmins, prefix, command, args, body }) => {
     try {
-        if (!isGroup) return reply("❌ This command can only be used in groups.");
-        
-        const botOwner = conn.user.id.split(":")[0]; // Extract bot owner's number
+        if (!isGroup) return reply("❌ مش ينفع تستعمل الأمر ده غير في الجروبات يا معلم.");
+
+        const botOwner = conn.user.id.split(":")[0];
         const senderJid = senderNumber + "@s.whatsapp.net";
 
         if (!groupAdmins.includes(senderJid) && senderNumber !== botOwner) {
-            return reply("❌ Only group admins or the bot owner can use this command.");
+            return reply("🛑 مش هسمعلك، انت مش من عيلة لوسيفر يا وله 🤫");
         }
 
-        // Ensure group metadata is fetched properly
         let groupInfo = await conn.groupMetadata(from).catch(() => null);
-        if (!groupInfo) return reply("❌ Failed to fetch group information.");
+        if (!groupInfo) return reply("⚠️ معرفتش أجيب بيانات الجروب.");
 
-        let groupName = groupInfo.subject || "Unknown Group";
+        let groupName = groupInfo.subject || "جروب";
         let totalMembers = participants ? participants.length : 0;
-        if (totalMembers === 0) return reply("❌ No members found in this group.");
+        if (totalMembers === 0) return reply("❌ مفيش أعضاء يا أسطورة؟");
 
-        let emojis = ['📢', '🔊', '🌐', '🔰', '❤‍🩹', '🤍', '🖤', '🩵', '📝', '💗', '🔖', '🪩', '📦', '🎉', '🛡️', '💸', '⏳', '🗿', '🚀', '❄️', '👨‍💻', '❄️', '❄️', '❄️', '❄️', '❄️', '⚠️', '🔥'];
-        let randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-
-        // Proper message extraction
         let message = body.slice(body.indexOf(command) + command.length).trim();
-        if (!message) message = "Attention Everyone"; // Default message
+        if (!message) message = "الكل يرد على عمكم لوسيفر 💀🔥";
 
-        let teks = `▢ Group : *${groupName}*\n▢ Members : *${totalMembers}*\n▢ Message: *${message}*\n\n┌───⊷ *MENTIONS*\n`;
+        let emojis = ['🔥','👊','⚡','💥','🧨','💀','👻','😈','🖕','🤘','🥵','🤯','🪓','⚔️','🎯','📢','🚨','💣','👁️‍🗨️','🕶️','🪬','💸','🩸','🎃'];
+        let randomEmoji = () => emojis[Math.floor(Math.random() * emojis.length)];
+
+        let teks = `╭───⟪ 👑 *منشن جماعي* 👑 ⟫───╮\n`;
+        teks += `│\n`;
+        teks += `│📛 *الجروب:* ${groupName}\n`;
+        teks += `│👥 *عدد الأعضاء:* ${totalMembers}\n`;
+        teks += `│💬 *الرسالة:* ${message}\n`;
+        teks += `│\n`;
+        teks += `├── ⟪ 🙋‍♂️ *الأعضاء* ⟫ ──┤\n`;
 
         for (let mem of participants) {
-            if (!mem.id) continue; // Prevent undefined errors
-            teks += `${randomEmoji} @${mem.id.split('@')[0]}\n`;
+            if (!mem.id) continue;
+            teks += `│${randomEmoji()} @${mem.id.split('@')[0]}\n`;
         }
 
-        teks += "└──✪ MEGALODON MD ✪──";
+        teks += `╰───⟪ 🖤 عمكم لوسيفر بيقول ردوا 🖤 ⟫───╯`;
 
         conn.sendMessage(from, { text: teks, mentions: participants.map(a => a.id) }, { quoted: mek });
 
     } catch (e) {
         console.error("TagAll Error:", e);
-        reply(`❌ *Error Occurred !!*\n\n${e.message || e}`);
+        reply(`❌ حصلت مشكله:\n${e.message || e}`);
     }
 });
-

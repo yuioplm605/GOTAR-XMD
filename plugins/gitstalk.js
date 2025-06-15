@@ -1,38 +1,39 @@
-const axios = require('axios');
-const config = require('../config');
-const { cmd, commands } = require('../command');
+const { cmd } = require("../command");
+const { owner } = require("../config");
 
 cmd({
-    pattern: "githubstalk",
-    desc: "Fetch detailed GitHub user profile including profile picture.",
-    category: "search",
-    react: "🖥️",
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
-    try {
-        const username = args[0];
-        if (!username) {
-            return reply("Please provide a GitHub username.");
-        }
-        const apiUrl = `https://api.github.com/users/${username}`;
-        const response = await axios.get(apiUrl);
-        const data = response.data;
+  pattern: "اسبام-صور",
+  alias: ["spamimg", "spic"],
+  desc: "اسبام صور متكررة برد على صورة",
+  react: "📸",
+  category: "fun",
+  filename: __filename
+}, async (conn, m, store, {
+  args,
+  reply,
+  isOwner,
+  quoted,
+  sender
+}) => {
+  if (!owner.includes(sender.split("@")[0])) {
+    return reply("🛑 مش بسمع غير كلام عمك لوسيفر يلا 🤫🖕🏻");
+  }
 
-        let userInfo = `👤 *Username*: ${data.name || data.login}
-🔗 *Github Url*:(${data.html_url})
-📝 *Bio*: ${data.bio || 'Not available'}
-🏙️ *Location*: ${data.location || 'Unknown'}
-📊 *Public Repos*: ${data.public_repos}
-👥 *Followers*: ${data.followers} | Following: ${data.following}
-📅 *Created At*: ${new Date(data.created_at).toDateString()}
-🔭 *Public Gists*: ${data.public_gists}
-> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴅʏʙʏ ᴛᴇᴄʜ*`;
-          const sentMsg = await conn.sendMessage(from,{image:{url: data.avatar_url },caption: userInfo },{quoted:mek })
-    } catch (e) {
-        console.log(e);
-        reply(`error: ${e.response ? e.response.data.message : e.message}`);
-    }
+  const count = parseInt(args[0]);
+  if (!quoted || !quoted.message || !quoted.message.imageMessage) {
+    return reply("❌ لازم ترد على صورة عشان أعمل اسبام!");
+  }
+
+  if (isNaN(count) || count < 1 || count > 100) {
+    return reply("⚠️ اكتب رقم بين 1 و 100 يا جامد!");
+  }
+
+  const media = await conn.downloadMediaMessage(quoted);
+
+  for (let i = 0; i < count; i++) {
+    await conn.sendMessage(m.chat, { image: media }, { quoted: m });
+    await new Promise(res => setTimeout(res, 100)); // 100 ملي ثانية بس
+  }
+
+  reply(`✅ خلصت اسبام ${count} صورة يا عمهم!`);
 });
-
-// DybyTech 

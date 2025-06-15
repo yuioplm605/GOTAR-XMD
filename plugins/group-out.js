@@ -1,51 +1,46 @@
-const { cmd } = require('../command');
+const config = require('../config')
+const { cmd } = require('../command')
+const { sleep } = require('../lib/functions')
 
 cmd({
-    pattern: "out",
-    alias: ["ck", "🦶"],
-    desc: "Removes all members with specific country code from the group",
+    pattern: "اطرد_دوله",
+    alias: ["out", "طرد_رقم", "🦶"],
+    desc: "طرد كل الناس اللى أرقامهم تبدأ بكود دولة معين",
     category: "group",
-    react: "❌",
+    react: "🦶",
     filename: __filename
 },
 async (conn, mek, m, {
-    from, q, isGroup, isBotAdmins, reply, groupMetadata, isCreator
+    from, q, isGroup, isBotAdmins, reply, groupMetadata, senderNumber
 }) => {
-    // Check if the command is used in a group
-    if (!isGroup) return reply("❌ This command can only be used in groups.");
+    const owner = config.OWNER_NUMBER;
 
-    // Check if the user is the bot owner/creator
-    if (!isCreator) {
-        return reply("❌ Only the bot owner can use this command.");
+    if (!isGroup) return reply("❌ الأمر ده لازم يشتغل فـ جروب بس ياعم!");
+
+    if (senderNumber !== owner) return reply("❌ مش بسمع غير كلام عمك لوسيفر 🤫🖕🏻");
+
+    if (!isBotAdmins) return reply("❌ خليني أدمن الأول يا معلم عشان أطرد.");
+
+    if (!q || !/^\d+$/.test(q.trim())) {
+        return reply("❌ اكتب كود الدولة بالأرقام بس.\nمثال: .اطرد_دوله 212");
     }
 
-    // Check if the bot is an admin
-    if (!isBotAdmins) return reply("❌ I need to be an admin to use this command.");
+    const code = q.trim();
+    const participants = groupMetadata.participants || [];
+    const targets = participants.filter(p => 
+        p.id && p.id.startsWith(code) && !p.admin && !p.id.includes(config.OWNER_NUMBER)
+    );
 
-    if (!q) return reply("❌ Please provide a country code. Example: .out 509");
-
-    const countryCode = q.trim();
-    if (!/^\d+$/.test(countryCode)) {
-        return reply("❌ Invalid country code. Please provide only numbers (e.g., 509 for +509 numbers)");
+    if (targets.length === 0) {
+        return reply(`❌ مفيش حد في الجروب رقمه بيبدأ بـ +${code}`);
     }
 
-    try {
-        const participants = await groupMetadata.participants;
-        const targets = participants.filter(
-            participant => participant.id.startsWith(countryCode) && 
-                         !participant.admin // Don't remove admins
-        );
+    reply(`⌛ بطرد ${targets.length} عضو رقمه بـ +${code}...`);
 
-        if (targets.length === 0) {
-            return reply(`❌ No members found with country code +${countryCode}`);
-        }
-
-        const jids = targets.map(p => p.id);
-        await conn.groupParticipantsUpdate(from, jids, "remove");
-        
-        reply(`✅ Successfully removed ${targets.length} members with country code +${countryCode}`);
-    } catch (error) {
-        console.error("Out command error:", error);
-        reply("❌ Failed to remove members. Error: " + error.message);
+    for (const user of targets) {
+        await conn.groupParticipantsUpdate(from, [user.id], "remove");
+        await sleep(1000); // استراحة بسيطة بين كل طرد
     }
+
+    reply(`✅ طردت كل الناس اللى رقمهم بيبدأ بـ +${code} ✌️`);
 });

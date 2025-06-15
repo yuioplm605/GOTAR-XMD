@@ -4,82 +4,78 @@ const { runtime } = require('../lib/functions');
 const axios = require('axios');
 
 function isEnabled(value) {
-    // Function to check if a value represents a "true" boolean state
     return value && value.toString().toLowerCase() === "true";
 }
 
 cmd({
-    pattern: "env",
-    alias: ["config", "setting"],
-    desc: "Show all bot configuration variables (Owner Only)",
-    category: "system",
+    pattern: "الاعدادات",
+    alias: ["env", "config", "setting"],
+    desc: "عرض كل إعدادات البوت (للمطور فقط)",
+    category: "النظام",
     react: "⚙️",
     filename: __filename
 }, 
 async (conn, mek, m, { from, quoted, reply, isOwner }) => {
     try {
-        // Owner check
         if (!isOwner) {
-            return reply("🚫 *Owner Only Command!* You're not authorized to view bot configurations.");
+            return reply("🚫 *الأمر دا للمطور بس!* ملكش صلاحية تشوف إعدادات البوت.");
         }
 
-        const isEnabled = (value) => value && value.toString().toLowerCase() === "true";
-
         let envSettings = `
-╭───『 *MEGALODON-MD CONFIG* 』───❏
+╭───『 *إعدادات بوت لوسيفر* 』───❏
 │
-├─❏ *🤖 BOT INFO*
-│  ├─∘ *Name:* ${config.BOT_NAME}
-│  ├─∘ *Prefix:* ${config.PREFIX}
-│  ├─∘ *Owner:* ${config.OWNER_NAME}
-│  ├─∘ *Number:* ${config.OWNER_NUMBER}
-│  └─∘ *Mode:* ${config.MODE.toUpperCase()}
+├─❏ *🤖 معلومات البوت*
+│  ├─∘ *الاسم:* ${config.BOT_NAME}
+│  ├─∘ *البادئة:* ${config.PREFIX}
+│  ├─∘ *المطور:* ${config.OWNER_NAME}
+│  ├─∘ *الرقم:* ${config.OWNER_NUMBER}
+│  └─∘ *الوضع:* ${config.MODE.toUpperCase()}
 │
-├─❏ *⚙️ CORE SETTINGS*
-│  ├─∘ *Public Mode:* ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}
-│  ├─∘ *Always Online:* ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}
-│  ├─∘ *Read Msgs:* ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}
-│  └─∘ *Read Cmds:* ${isEnabled(config.READ_CMD) ? "✅" : "❌"}
+├─❏ *⚙️ إعدادات أساسية*
+│  ├─∘ *وضع عام:* ${isEnabled(config.PUBLIC_MODE) ? "✅" : "❌"}
+│  ├─∘ *دائم الاتصال:* ${isEnabled(config.ALWAYS_ONLINE) ? "✅" : "❌"}
+│  ├─∘ *قراءة الرسائل:* ${isEnabled(config.READ_MESSAGE) ? "✅" : "❌"}
+│  └─∘ *قراءة الأوامر:* ${isEnabled(config.READ_CMD) ? "✅" : "❌"}
 │
-├─❏ *🔌 AUTOMATION*
-│  ├─∘ *Auto Reply:* ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}
-│  ├─∘ *Auto React:* ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}
-│  ├─∘ *Custom React:* ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}
-│  ├─∘ *React Emojis:* ${config.CUSTOM_REACT_EMOJIS}
-│  ├─∘ *Auto Sticker:* ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}
-│  └─∘ *Auto Voice:* ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}
+├─❏ *🔌 تلقائي*
+│  ├─∘ *رد تلقائي:* ${isEnabled(config.AUTO_REPLY) ? "✅" : "❌"}
+│  ├─∘ *تفاعل تلقائي:* ${isEnabled(config.AUTO_REACT) ? "✅" : "❌"}
+│  ├─∘ *تفاعل مخصص:* ${isEnabled(config.CUSTOM_REACT) ? "✅" : "❌"}
+│  ├─∘ *إيموجي التفاعل:* ${config.CUSTOM_REACT_EMOJIS}
+│  ├─∘ *استيكر تلقائي:* ${isEnabled(config.AUTO_STICKER) ? "✅" : "❌"}
+│  └─∘ *صوت تلقائي:* ${isEnabled(config.AUTO_VOICE) ? "✅" : "❌"}
 │
-├─❏ *📢 STATUS SETTINGS*
-│  ├─∘ *Status Seen:* ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}
-│  ├─∘ *Status Reply:* ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}
-│  ├─∘ *Status React:* ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}
-│  └─∘ *Status Msg:* ${config.AUTO_STATUS_MSG}
+├─❏ *📢 حالة الستوري*
+│  ├─∘ *مشاهدة تلقائي:* ${isEnabled(config.AUTO_STATUS_SEEN) ? "✅" : "❌"}
+│  ├─∘ *رد تلقائي:* ${isEnabled(config.AUTO_STATUS_REPLY) ? "✅" : "❌"}
+│  ├─∘ *تفاعل تلقائي:* ${isEnabled(config.AUTO_STATUS_REACT) ? "✅" : "❌"}
+│  └─∘ *رسالة الحالة:* ${config.AUTO_STATUS_MSG}
 │
-├─❏ *🛡️ SECURITY*
-│  ├─∘ *Anti-Link:* ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}
-│  ├─∘ *Anti-Bad:* ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}
-│  ├─∘ *Anti-VV:* ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}
-│  └─∘ *Del Links:* ${isEnabled(config.DELETE_LINKS) ? "✅" : "❌"}
+├─❏ *🛡️ الحماية*
+│  ├─∘ *منع الروابط:* ${isEnabled(config.ANTI_LINK) ? "✅" : "❌"}
+│  ├─∘ *منع الكلام الوحش:* ${isEnabled(config.ANTI_BAD) ? "✅" : "❌"}
+│  ├─∘ *منع فيس وفيديو:* ${isEnabled(config.ANTI_VV) ? "✅" : "❌"}
+│  └─∘ *حذف الروابط:* ${isEnabled(config.DELETE_LINKS) ? "✅" : "❌"}
 │
-├─❏ *🎨 MEDIA*
-│  ├─∘ *Alive Img:* ${config.ALIVE_IMG}
-│  ├─∘ *Menu Img:* ${config.MENU_IMAGE_URL}
-│  ├─∘ *Alive Msg:* ${config.LIVE_MSG}
-│  └─∘ *Sticker Pack:* ${config.STICKER_NAME}
+├─❏ *🎨 الوسائط*
+│  ├─∘ *صورة البوت:* ${config.ALIVE_IMG}
+│  ├─∘ *صورة المنيو:* ${config.MENU_IMAGE_URL}
+│  ├─∘ *رسالة البوت:* ${config.LIVE_MSG}
+│  └─∘ *باك الاستيكر:* ${config.STICKER_NAME}
 │
-├─❏ *⏳ MISC*
-│  ├─∘ *Auto Typing:* ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}
-│  ├─∘ *Auto Record:* ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}
-│  ├─∘ *Anti-Del Path:* ${config.ANTI_DEL_PATH}
-│  └─∘ *Dev Number:* ${config.DEV}
+├─❏ *⏳ إضافي*
+│  ├─∘ *كتابة تلقائية:* ${isEnabled(config.AUTO_TYPING) ? "✅" : "❌"}
+│  ├─∘ *تسجيل تلقائي:* ${isEnabled(config.AUTO_RECORDING) ? "✅" : "❌"}
+│  ├─∘ *مسار منع الحذف:* ${config.ANTI_DEL_PATH}
+│  └─∘ *رقم المطور:* ${config.DEV}
 │
-╰───『 *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴍᴇɢᴀʟᴏᴅᴏɴ ᴍᴅ* 』──❏
+╰───『 *البوت بتاع عمك لوسيفر 💀* 』──❏
 `;
 
         await conn.sendMessage(
             from,
             {
-                image: { url: `https://files.catbox.moe/frns4k.jpg` },
+                image: { url: `https://files.catbox.moe/3qt5au.jpg` },
                 caption: envSettings,
                 contextInfo: {
                     mentionedJid: [m.sender],
@@ -93,6 +89,6 @@ async (conn, mek, m, { from, quoted, reply, isOwner }) => {
 
     } catch (error) {
         console.error('Env command error:', error);
-        reply(`❌ Error displaying config: ${error.message}`);
+        reply(`❌ حصل خطأ: ${error.message}`);
     }
 });

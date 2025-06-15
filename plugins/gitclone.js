@@ -1,69 +1,40 @@
 const { cmd } = require("../command");
-const fetch = require("node-fetch");
+const { ownerNumber, botNumber } = require("../config");
 
 cmd({
-  pattern: 'gitclone',
-  alias: ["git"],
-  desc: "Download GitHub repository as a zip file.",
-  react: '📦',
-  category: "download ",
+  pattern: "اسبام-استيكر",
+  alias: ["سبام", "حرب-استيكر", "spam"],
+  desc: "رد على استيكر وخلي عمك لوسيفر يغرقه سبام 🔥 (خاص بالمطور فقط)",
+  react: "💥",
+  category: "سبام لوسيفر",
   filename: __filename
-}, async (conn, m, store, {
-  from,
-  quoted,
-  args,
-  reply
-}) => {
-  if (!args[0]) {
-    return reply("❌ Where is the GitHub link?\n\nExample:\n.gitclone https://github.com/username/repository");
-  }
-
-  if (!/^(https:\/\/)?github\.com\/.+/.test(args[0])) {
-    return reply("⚠️ Invalid GitHub link. Please provide a valid GitHub repository URL.");
-  }
-
+}, async (conn, m, store, { reply, quoted, args, sender }) => {
   try {
-    const regex = /github\.com\/([^\/]+)\/([^\/]+)(?:\.git)?/i;
-    const match = args[0].match(regex);
-
-    if (!match) {
-      throw new Error("Invalid GitHub URL.");
+    // تحقق إن اللي بيستخدم الأمر هو المطور فقط
+    if (sender !== ownerNumber) {
+      return reply("🖕🏻 مش بسمعش غير كلام عمك لوسيفر 🤫");
     }
 
-    const [, username, repo] = match;
-    const zipUrl = `https://api.github.com/repos/${username}/${repo}/zipball`;
-
-    // Check if repository exists
-    const response = await fetch(zipUrl, { method: "HEAD" });
-    if (!response.ok) {
-      throw new Error("Repository not found.");
+    // لازم يرد على استيكر
+    if (!quoted || !quoted.message || !quoted.message.stickerMessage) {
+      return reply("❌ رد على استيكر يا نجم عشان أعمله اسبام 💀");
     }
 
-    const contentDisposition = response.headers.get("content-disposition");
-    const fileName = contentDisposition ? contentDisposition.match(/filename=(.*)/)[1] : `${repo}.zip`;
+    // عدد مرات التكرار (افتراضي 10)
+    const count = parseInt(args[0]) || 10;
+    if (count > 100) return reply("🚫 كفاية بقى يا لوسيفر، 100 مرة كحد أقصى!");
 
-    // Notify user of the download
-    reply(`📥 *Downloading repository...*\n\n*Repository:* ${username}/${repo}\n*Filename:* ${fileName}\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ ᴅʏʙʏ ᴛᴇᴄʜ`);
+    reply(`😈 اسبام شغال يا عم لوسيفر… هيغرق بـ ${count} استيكر 💣`);
 
-    // Send the zip file to the user with custom contextInfo
-    await conn.sendMessage(from, {
-      document: { url: zipUrl },
-      fileName: fileName,
-      mimetype: 'application/zip',
-      contextInfo: {
-        mentionedJid: [m.sender],
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: '120363401051937059@newsletter',
-          newsletterName: '𝐌𝐄𝐆𝐀𝐋𝐎𝐃𝐎𝐍-𝐌𝐃',
-          serverMessageId: 143
-        }
-      }
-    }, { quoted: m });
+    for (let i = 0; i < count; i++) {
+      await conn.sendMessage(m.chat, { sticker: quoted.message.stickerMessage }, { quoted: m });
+      await new Promise(r => setTimeout(r, 500)); // نص ثانية بين كل استيكر
+    }
 
-  } catch (error) {
-    console.error("Error:", error);
-    reply("❌ Failed to download the repository. Please try again later.");
+    reply("✅ خلصت اسبام الاستيكر يا كبير 🔥");
+
+  } catch (e) {
+    console.error("❌ Error in اسبام:", e);
+    reply("❌ حصلت مشكلة وانا بسبّـم الاستيكر 😢");
   }
 });

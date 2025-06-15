@@ -34,7 +34,7 @@ async (conn, mek, m, { from, reply }) => {
 *┃❃* *ᴘʀᴇғɪx* : [ ${config.PREFIX} ]
 *┃❃* *ᴩʟᴜɢɪɴ* : ${totalCommands}
 *┃❃* *ᴅᴇᴠ* : *✪『𝙇𝙐𝘾𝙄𝙁𝙀𝙍』✪*
-*┃❃* *ᴠᴇʀsɪᴏɴs* :🍷 3MK LUCIFER 🍷
+*┃❃* *ᴠᴇʀsɪᴏɴs* : 3MK LUCIFER 🥂✨
 *┕──────────────❒*
 `;
 

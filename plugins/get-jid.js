@@ -1,32 +1,31 @@
 const { cmd } = require('../command');
 
 cmd({
-    pattern: "jid",
-    alias: ["id", "chatid", "gjid"],  
-    desc: "Get full JID of current chat/user (Creator Only)",
-    react: "🆔",
-    category: "utility",
-    filename: __filename,
-}, async (conn, mek, m, { 
-    from, isGroup, isOwner, reply, sender 
-}) => {
-    try {
-        if (!isOwner) {
-            return reply("❌ *Command Restricted* - Only my creator can use this.");
-        }
-
-        if (isGroup) {
-            // Ensure group JID ends with @g.us
-            const groupJID = from.includes('@g.us') ? from : `${from}@g.us`;
-            return reply(`👥 *Group JID:*\n\`\`\`${groupJID}\`\`\``);
-        } else {
-            // Ensure user JID ends with @s.whatsapp.net
-            const userJID = sender.includes('@s.whatsapp.net') ? sender : `${sender}@s.whatsapp.net`;
-            return reply(`👤 *User JID:*\n\`\`\`${userJID}\`\`\``);
-        }
-
-    } catch (e) {
-        console.error("JID Error:", e);
-        reply(`⚠️ Error fetching JID:\n${e.message}`);
+  pattern: "جروباتي",
+  alias: ["groups", "mygroups"],
+  desc: "يعرضلك كل الجروبات اللي البوت فيها واسم كل جروب مع الـ JID (للمطور فقط)",
+  react: "📋",
+  category: "أوامر المطور",
+  filename: __filename,
+}, async (conn, mek, m, { isOwner, reply }) => {
+  try {
+    if (!isOwner) {
+      return reply("❌ مش بسمعش غير كلام عمك لوسيفر يلا 🤫🖕🏻");
     }
+
+    let groups = Object.entries(conn.groupMetadata).map(([id, data]) => {
+      return `📛 *${data.subject}*\n🆔 \`${id}\``;
+    });
+
+    if (!groups.length) {
+      return reply("❌ مش داخل أي جروب حاليًا يا كبير 😥");
+    }
+
+    let message = `👑 *الجروبات اللي البوت فيها:*\n\n${groups.join("\n\n")}`;
+    await reply(message);
+
+  } catch (e) {
+    console.error("جروباتي Error:", e);
+    reply(`⚠️ حصلت مشكلة:\n${e.message}`);
+  }
 });
