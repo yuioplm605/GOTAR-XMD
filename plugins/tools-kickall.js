@@ -104,12 +104,9 @@ async (conn, mek, m, {
 
 
 // remove all members except bot and owner
-const { cmd } = require('../command');
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 cmd({
-    pattern: "kickalls2",
-    alias: ["kickall2", "endgc2", "endgroup2"],
+    pattern: "طرد-الكل",
+    alias: ["في-داهيه", "الكل-برا", "endgroup2"],
     desc: "يطرد الكل من الجروب ماعدا البوت وعمهم لوسيفر.",
     react: "💀",
     category: "group",
